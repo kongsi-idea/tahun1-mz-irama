@@ -75,7 +75,7 @@ const KEY_MAP: Record<string, Pad> = {
   J: 'tamb',
 }
 
-/** 键盘：←／F＝鼓，→／J＝铃鼓。长按不重复触发。 */
+/** 键盘：←／F＝鼓，→／J＝三角铁。长按不重复触发。 */
 export function bindKeyboard(target: Window | HTMLElement = window): () => void {
   const down = ((e: KeyboardEvent) => {
     const pad = KEY_MAP[e.key]

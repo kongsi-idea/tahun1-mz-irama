@@ -11,8 +11,7 @@ import type { JudgeResult, TimedPad, Verdict } from '../engine/judge.ts'
 import type { Pad } from '../engine/config.ts'
 import { adaptAfterRound, getOffsetMs, visualTime } from '../engine/calibrate.ts'
 import { click, initSynth, playPad, setBackingLevel } from '../engine/synth.ts'
-import { playCount } from '../engine/countVoice.ts'
-import { buildTimeline, segmentAt } from './timeline.ts'
+import { buildTimeline, extendPrep, segmentAt } from './timeline.ts'
 import type { PhaseName, RoundSpec, Timeline } from './timeline.ts'
 import type { Cell } from '../data/levels.ts'
 
@@ -53,14 +52,16 @@ export interface SessionView {
   combo: number
   /** heardBeat（小数），画面算每拍脉动用 */
   beat: number
-  /** 预备（prep）时第几拍（0~3，画面依序「预备、3、2、1」）；其他时候 -1 */
+  /** 预备（prep）时这一小节第几拍（0~3，画面依序「预备、3、2、1」；扶梯多转时重复）；其他时候 -1 */
   count: number
   /** heardBeat 减去本轮「学生第一拍」（预备、学生回合、休息才有值；其他时候 -99）。画面算「缩小的预告圈」用 */
   pbeat: number
 }
 
-/** 学生回合的预备小节，节拍器比平常响（第 1 拍最重）。 */
+/** 学生回合（预备＋学生打），节拍器比平常响（第 1 拍最重）。预备和学生打用同一个声音，扶梯多转几圈听起来都一样。 */
 const PREP_CLICK_BOOST = 1.6
+/** 扶梯最多多转几小节（学生一直不按就照常开始，算漏掉，不卡死）。 */
+export const MAX_WAIT_BARS = 3
 /** 关卡里伴奏整体降到这个比例，让节拍器压过伴奏。 */
 export const BACKING_LEVEL_IN_GAME = 0.6
 
@@ -91,6 +92,9 @@ export class Session {
   private done = false
   private announced = new Set<number>()
   private opts: SessionOptions
+  /** 第几轮的学生已经踏上扶梯（follow 模式一开始就算） */
+  private stepped: boolean[] = []
+  private waits: number[] = []
 
   constructor(opts: SessionOptions) {
     this.opts = opts
@@ -114,12 +118,8 @@ export class Session {
     this.offTick = this.sched.subscribe((t) => {
       if (!t.isBeat || t.beat >= tl.totalBeats) return
       const seg = segmentAt(tl, t.beat)
-      click(t.time, t.beatInBar === 0, seg?.phase === 'prep' ? PREP_CLICK_BOOST : 1)
-      if (seg && seg.phase === 'prep') {
-        // 预备拍人声「预备、三、二、一」，排在拍点上（念长了就在下一拍前收掉）
-        const len = beatToSeconds(t.beat + 1, tl.tempoMap) - beatToSeconds(t.beat, tl.tempoMap)
-        playCount(t.beat - seg.start, t.time, len * 0.9)
-      }
+      const turn = seg?.phase === 'prep' || (seg?.phase === 'play' && tl.rounds[seg.round].spec.mode !== 'follow')
+      click(t.time, t.beatInBar === 0, turn ? PREP_CLICK_BOOST : 1)
       if (seg && seg.phase === 'demo') {
         const spec = tl.rounds[seg.round].spec
         const cell = spec.pattern[t.beat - seg.start]
@@ -138,6 +138,11 @@ export class Session {
     this.offTick = null
     this.offInput = null
     setBackingLevel(1)
+  }
+
+  /** 第 round 轮扶梯已经多转了几小节。 */
+  waitsOf(round: number): number {
+    return this.waits[round] ?? 0
   }
 
   /** 第 round 轮、第 i 个音符的 audio 时间。 */
@@ -200,10 +205,33 @@ export class Session {
     return { combo: run, best }
   }
 
+  /**
+   * 扶梯：学生回合的第 1 拍（小节线）判定窗关了，看学生有没有在窗内按（哪个垫子都算）。
+   * 有＝踏上去了，照常判；没有＝预备再转一小节（最多 MAX_WAIT_BARS 次）。预备和学生打的声音一样，所以晚决定也听不出来。
+   */
+  private checkStep(now: number): void {
+    const { tl } = this
+    const r = tl.rounds.findIndex((lay, i) => !this.stepped[i] && lay.spec.mode !== 'follow')
+    if (r < 0) return
+    const off = getOffsetMs() / 1000
+    const win = GOOD_WINDOW_MS / 1000
+    const t0 = this.noteTime(r, 0) + off
+    if (now <= t0 + win + 0.02) return
+    const hit = this.inputs.some((x) => x.time >= t0 - win && x.time <= t0 + win)
+    if (hit || (this.waits[r] ?? 0) >= MAX_WAIT_BARS) {
+      this.stepped[r] = true
+      return
+    }
+    const at = extendPrep(tl, r)
+    this.sched.shiftTempoFrom(at, 4)
+    this.waits[r] = (this.waits[r] ?? 0) + 1
+  }
+
   /** 每个 rAF 呼叫一次：处理每轮结算，并回传画面状态。 */
   frame(): SessionView {
     const { tl } = this
     const now = getContext().currentTime
+    this.checkStep(now)
     // 先结算已经打完的轮
     while (this.finalized < tl.rounds.length && this.roundWindowClosed(this.finalized, now)) {
       const idx = this.finalized
@@ -255,7 +283,7 @@ export class Session {
       // 学生回合也亮：每一拍到了，该拍的图标亮圈（和学一学第 3 步一样）；下一拍的预告圈由 pbeat 在画面里算
       cueing = true
     }
-    const count = inRound && seg.phase === 'prep' ? Math.min(seg.beats - 1, Math.floor(beat - seg.start)) : -1
+    const count = inRound && seg.phase === 'prep' ? Math.floor(beat - seg.start) % 4 : -1
     const pbeat =
       seg.phase === 'lead' || (inRound && (seg.phase === 'prep' || seg.phase === 'play' || seg.phase === 'rest'))
         ? beat - lay.playStart // 开场预备时算第 0 轮的（跟拍模式第一格的预告圈要从预备最后一拍开始缩）

@@ -1,5 +1,5 @@
 // 所有给学生看／听的句子集中在这里（key → 中文）。画面只引用 key，不写死中文。
-// 老师还在跟音乐老师确认：节奏念法（ta／ti-ti）、乐器名（铃鼓）。改这里即可，不用动组件。
+// 10-11 老师定：kerincing＝三角铁（内部 id 仍叫 tamb）；节奏念法 ta／ti-ti。改这里即可，不用动组件。
 // 参数用 {n} 之类的占位，t('key', { n: 3 }) 代入。
 // 句子里可以写 {drum}、{tamb}、{ta}、{titi}：会代入上面的 inst.*、term.*（所以乐器名、念法只在这个档案出现一次）。
 // 语音：speak(key) 播 public/audio/<FNV(声音|句子)>.mp3（档名由句子内容算出，句子一改，旧录音就自动作废）。
@@ -14,7 +14,7 @@ export const SAY = {
   'app.credit': '黄慧欣老师',
   'common.back': '返回',
   'inst.drum': '鼓',
-  'inst.tamb': '铃鼓',
+  'inst.tamb': '三角铁',
   'term.ta': 'ta',
   'term.titi': 'ti-ti',
 
@@ -41,7 +41,7 @@ export const SAY = {
 
   // 学一学
   'learn.title': '学一学',
-  'learn.progress': '第 {n} 步，共 5 步',
+  'learn.progress': '第 {n} 步，共 6 步',
   'learn.pass': '过关啦！',
   'learn.next': '下一步',
   'learn.go': '开始',
@@ -49,26 +49,28 @@ export const SAY = {
   'learn.toMap': '去地图',
   'learn.retry': '没关系，再来一次！',
   'learn.1.title': '听一听',
-  'learn.1.say': '这是{drum}，咚！这是{tamb}，铃铃！',
+  'learn.1.say': '这是{drum}，咚！这是{tamb}，叮！',
   'learn.1.hint': '点点看，两个垫子都试一试',
-  'learn.1.hearDrum': '听熊敲{drum}',
-  'learn.1.hearTamb': '听熊摇{tamb}',
+  'learn.1.hearDrum': '听我敲{drum}',
+  'learn.1.hearTamb': '听我敲{tamb}',
   'learn.2.title': '分一分',
   'learn.2.say': '听！这是{drum}，还是{tamb}？',
   'learn.2.replay': '再听一次',
   'learn.2.right': '答对了！',
   'learn.2.wrong': '再听听看',
+  'learn.join.title': '听四下，再开始',
+  'learn.join.say': '先听“嗒、嗒、嗒、嗒”四下，看到 3、2、1，下一下就拍{drum}！还没准备好？没关系，它会一直转，等你。',
   'learn.3.title': '一颗草莓拍一下',
   'learn.3.say': '草莓一颗一颗亮起来，亮一颗，就拍一下{drum}！',
   'learn.4.title': '第一拍最重',
   'learn.4.say': '大草莓是{drum}，小柠檬是{tamb}，跟着拍子打！',
   'learn.5.title': '小测验',
-  'learn.5.say': '熊先打，再换你打一样的！',
-  'learn.5.back': '再回去练一练第三步吧',
+  'learn.5.say': '我先打，再换你打一样的！',
+  'learn.5.back': '再回去练一练「一颗草莓拍一下」吧',
 
   // 玩
   'play.ready': '预备……',
-  'play.listen': '听熊打',
+  'play.listen': '听我打',
   'play.look': '看着谱',
   'play.yourTurn': '换你了！',
   'play.countReady': '预备',
@@ -170,6 +172,7 @@ export const VOICE_KEYS: readonly SayKey[] = [
   'learn.2.say',
   'learn.2.right',
   'learn.2.wrong',
+  'learn.join.say',
   'learn.3.say',
   'learn.4.say',
   'learn.5.say',
@@ -188,7 +191,7 @@ export const VOICE_KEYS: readonly SayKey[] = [
 /** 念出来的字和画面上的字不同的少数 key（一次念完两句，因为新的语音会打断旧的）。 */
 const VOICE_TEXT: Partial<Record<SayKey, string>> = {
   'sc.tip': '请打开声音，关掉静音键。点一点下面的垫子，听得到声音吗？',
-  'learn.1.say': '这是{drum}，咚！这是{tamb}，铃铃！点点看，两个垫子都试一试。',
+  'learn.1.say': '这是{drum}，咚！这是{tamb}，叮！点点看，两个垫子都试一试。',
   'play.ready': '预备！',
 }
 

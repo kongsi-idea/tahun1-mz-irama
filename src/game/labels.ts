@@ -23,7 +23,7 @@ export function phaseLabel(v: SessionView | null, mode: Mode): SayKey | null {
 }
 
 /**
- * 熊的动作：示范时跟着声音换（鼓→敲鼓图、铃鼓→摇铃鼓图）；学生打的时候看连击——
+ * 熊的动作：示范时跟着声音换（鼓→敲鼓图、三角铁→敲三角铁图）；学生打的时候看连击——
  * 10 连击＝开心跳、20 连击＝转圈（5 连击＝摇头，是 CSS 在 idle 图上做的，见 data-tier）；
  * 休息时依表现开心／鼓励。漏掉那一瞬间的鼓励图由 game/useCheer 暂时盖上去。
  */

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { PREP_BEATS, buildTimeline, segmentAt, tempoOnBarLines } from '../src/game/timeline.ts'
+import { PREP_BEATS, buildTimeline, extendPrep, segmentAt, tempoOnBarLines } from '../src/game/timeline.ts'
 import type { RoundSpec } from '../src/game/timeline.ts'
 import { summarize } from '../src/game/score.ts'
 import { isUnlockedWith } from '../src/data/progress.ts'
@@ -57,6 +57,30 @@ test('时间轴：所有轮（含 8 拍、变速）起点都在小节线，变�
   for (const r of tl.rounds) assert.equal(r.start % 4, 0)
   assert.ok(tempoOnBarLines(tl))
   assert.deepEqual(tl.tempoMap.map((x) => x.bpm), [70, 90, 110])
+})
+
+test('扶梯：学生没踏进来，预备多转一小节，之后的段、轮、变速点都往后挪 4 拍，仍在小节线', () => {
+  const tl = buildTimeline([four(70), four(90)])
+  const before = tl.rounds[0].playStart
+  const at = extendPrep(tl, 0)
+  assert.equal(at, before)
+  assert.equal(tl.rounds[0].playStart, before + 4)
+  const prep = tl.segments.find((x) => x.phase === 'prep' && x.round === 0)
+  assert.equal(prep?.beats, 8, '预备变两小节')
+  assert.equal(segmentAt(tl, before)?.phase, 'prep', '原本学生第 1 拍现在还是预备')
+  assert.equal(segmentAt(tl, before + 4)?.phase, 'play')
+  assert.equal(tl.rounds[1].start, 24)
+  assert.equal(tl.totalBeats, 4 + 16 + 16 + 4)
+  assert.deepEqual(tl.tempoMap, [{ beat: 0, bpm: 70 }, { beat: 24, bpm: 90 }])
+  assert.ok(tempoOnBarLines(tl))
+  for (const r of tl.rounds) assert.equal(r.playStart % 4, 0)
+})
+
+test('join 模式（学一学「听四下，再开始」）：没有开场、没有示范，预备 4 拍就换学生', () => {
+  const tl = buildTimeline([{ pattern: ['drum', 'drum', 'drum', 'drum'], bpm: 76, mode: 'join' }])
+  assert.equal(segmentAt(tl, 0)?.phase, 'prep')
+  assert.equal(tl.rounds[0].playStart, 4)
+  assert.equal(tl.totalBeats, 12)
 })
 
 test('成绩合计：全完美 3 星；多按扣分；一半漏掉不到 1 星', () => {

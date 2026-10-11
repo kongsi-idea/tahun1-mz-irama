@@ -8,7 +8,7 @@ import { playPad } from '../engine/synth.ts'
 import { setLearnDone } from '../data/progress.ts'
 import { accentMask } from '../data/levels.ts'
 import type { Cell } from '../data/levels.ts'
-import { speak, t } from '../data/say.ts'
+import { speak, stopSpeaking, t } from '../data/say.ts'
 import type { SayKey } from '../data/say.ts'
 import { useSession } from '../game/useSession.ts'
 import { useCheer } from '../game/useCheer.ts'
@@ -23,15 +23,18 @@ import IconTrack from '../ui/IconTrack.tsx'
 import TopBar from '../ui/TopBar.tsx'
 import type { Go } from './nav.ts'
 
-// 学一学（规格 §3.2）五步，每步都要学生动手，没过不能跳（?skip=1 由 App 直接绕过整个学一学）：
+// 学一学（规格 §3.2）六步，每步都要学生动手，没过不能跳（?skip=1 由 App 直接绕过整个学一学）：
 //   1 听一听：两个垫子各点 2 下        2 分一分：听声音点对的乐器，答对 3 题
-//   3 一颗草莓拍一下：4 拍都在「很好」以内（没过自动再来，不显示失败）
-//   4 第一拍最重：跟着打 2 小节，≥ ★（60%）      5 小测验：2 题回声都 ≥ ★；没过回第 3 步
+//   3 听四下，再开始：节拍器「嗒嗒嗒嗒」一直转（扶梯），学生自己在第 1 拍踏进来，拍 4 下都在「很好」以内（10-11 老师回馈加的）
+//   4 一颗草莓拍一下：4 拍都在「很好」以内（没过自动再来，不显示失败）
+//   5 第一拍最重：跟着打 2 小节，≥ ★（60%）      6 小测验：2 题回声都 ≥ ★；没过回第 4 步
 const D: Cell = 'drum'
 const T: Cell = 'tamb'
 const LEARN_BPM = 76
 
+const STEP_JOIN: RoundSpec[] = [{ pattern: [D, D, D, D], bpm: LEARN_BPM, mode: 'join' }]
 const STEP3: RoundSpec[] = [{ pattern: [D, D, D, D], bpm: LEARN_BPM, mode: 'follow' }]
+const LAST_STEP = 6
 const STEP4_PATTERN: Cell[] = [D, T, T, T, D, T, T, T]
 const STEP4: RoundSpec[] = [
   { pattern: STEP4_PATTERN, bpm: LEARN_BPM, mode: 'follow', accent: accentMask(STEP4_PATTERN, 'first') },
@@ -76,7 +79,7 @@ function Top({
         onBack={() => go({ name: 'home' })}
         right={
           <div className="step-dots" aria-label={t('learn.progress', { n: step })}>
-            {[1, 2, 3, 4, 5].map((i) => (
+            {Array.from({ length: LAST_STEP }, (_, k) => k + 1).map((i) => (
               <i key={i} className={i === step ? 'on' : i < step ? 'past' : ''} />
             ))}
           </div>
@@ -293,13 +296,12 @@ function RhythmStep({
   useEffect(() => {
     if (state === 'retry') speak('learn.retry')
   }, [state])
+  // 跟拍进行中不念（人声会和节拍混在一起）；开始前的说明、过关／再来一次才念
   const label = phaseLabel(view, mode)
-  useEffect(() => {
-    if (label) speak(label)
-  }, [label])
 
   const begin = () => {
     void unlock()
+    stopSpeaking() // 说明还没念完就按开始：先停，不让人声叠在节拍上
     setState('running')
     start(
       {
@@ -331,8 +333,6 @@ function RhythmStep({
   const first = specs[0]
   const cells = view?.cells ?? first.pattern
   const accent = view?.accent ?? first.accent ?? []
-  const hideAhead = !!view && mode === 'echo' && view.phase === 'demo'
-  const hideAll = !!view && mode === 'echo' && view.phase === 'lead'
 
   const track =
     state === 'pass' ? (
@@ -345,8 +345,6 @@ function RhythmStep({
           verdicts={view?.verdicts}
           cursor={view?.cursor}
           cueing={view?.cueing}
-          hideAhead={hideAhead}
-          hideAll={hideAll}
         />
       </div>
     )
@@ -371,7 +369,14 @@ function RhythmStep({
                 </button>
               </div>
             ) : (
-              <p className="phase-label">{state === 'retry' ? t('learn.retry') : label ? t(label) : '\u00a0'}</p>
+              <>
+                <p className="phase-label">{state === 'retry' ? t('learn.retry') : label ? t(label) : '\u00a0'}</p>
+                {state === 'running' && view && view.count >= 0 && (
+                  <b key={`c${view.beat | 0}`} className={`count-num${view.count === 0 ? ' is-ready' : ''}`}>
+                    {view.count === 0 ? t('play.countReady') : 4 - view.count}
+                  </b>
+                )}
+              </>
             )
           }
         />
@@ -387,7 +392,7 @@ export default function Learn({ go }: { go: Go }) {
 
   const onNext = () => {
     setNotice(null)
-    if (step >= 5) {
+    if (step >= LAST_STEP) {
       setLearnDone()
       go({ name: 'map' })
     } else setStep(step + 1)
@@ -402,9 +407,9 @@ export default function Learn({ go }: { go: Go }) {
       <RhythmStep
         key={3}
         {...common}
-        titleKey="learn.3.title"
-        sayKey="learn.3.say"
-        specs={STEP3}
+        titleKey="learn.join.title"
+        sayKey="learn.join.say"
+        specs={STEP_JOIN}
         backing={null}
         ok={allHit}
       />
@@ -413,6 +418,18 @@ export default function Learn({ go }: { go: Go }) {
     body = (
       <RhythmStep
         key={4}
+        {...common}
+        titleKey="learn.3.title"
+        sayKey="learn.3.say"
+        specs={STEP3}
+        backing={null}
+        ok={allHit}
+      />
+    )
+  else if (step === 5)
+    body = (
+      <RhythmStep
+        key={5}
         {...common}
         titleKey="learn.4.title"
         sayKey="learn.4.say"
@@ -424,7 +441,7 @@ export default function Learn({ go }: { go: Go }) {
   else
     body = (
       <RhythmStep
-        key={5}
+        key={6}
         {...common}
         titleKey="learn.5.title"
         sayKey="learn.5.say"
@@ -434,7 +451,7 @@ export default function Learn({ go }: { go: Go }) {
         last
         onFail={() => {
           setNotice('learn.5.back')
-          setStep(3)
+          setStep(4)
         }}
       />
     )

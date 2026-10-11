@@ -25,7 +25,7 @@ interface View {
 }
 const IDLE: View = { beat: -1, text: '', me: false }
 
-// 试听页：给老师听声音用。鼓、铃鼓大垫、节拍器、两种伴奏、回声示范。
+// 试听页：给老师听声音用。鼓、三角铁大垫、节拍器、两种伴奏、回声示范。
 export default function Listen() {
   const [mode, setMode] = useState<Mode>(null)
   const [bpm, setBpm] = useState(85)
@@ -102,7 +102,7 @@ export default function Listen() {
       let me = false
       if (mode === 'echo') {
         if (bar < ECHO_PREP_BARS) text = '预备……'
-        else if ((bar - ECHO_PREP_BARS) % 2 === 0) text = '果冻熊示范：鼓 铃 铃 铃'
+        else if ((bar - ECHO_PREP_BARS) % 2 === 0) text = '果冻熊示范：鼓 叮 叮 叮'
         else {
           text = '换你了！'
           me = true

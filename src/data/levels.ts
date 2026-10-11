@@ -1,7 +1,7 @@
 // 关卡资料（规格 §3.4）：6 个世界 × 3 关＝18 关，节奏型全部写死，不随机。写完用 `npm run dump:levels` 印出来通读。
 //
 // ── 型别说明（C4 照填）──────────────────────────────────────────
-// Cell        一格节奏：'drum'＝鼓（草莓，一年级的 ♩）、'tamb'＝铃鼓（柠檬）。
+// Cell        一格节奏：'drum'＝鼓（草莓，一年级的 ♩）、'tamb'＝三角铁（柠檬）。
 // RoundDef    一轮：pattern（4 或 8 拍，一拍一格）；bpm 省略＝用关卡的 bpm，写了就覆盖（世界 4 变速：每轮不同）；
 //             accent 省略＝用关卡的强拍规则，写了就覆盖（世界 3、6 的大考验同一关混用两种强拍）。
 //             bpm 必须在 60–120。变速只会在轮与轮之间发生（轮的长度都是整小节，所以一定落在小节线上）。
@@ -12,9 +12,9 @@
 //   rounds    恰好 4 轮（一关 4 轮，节奏越来越难）。
 //   demo      true＝熊先示范；false＝不放示范，只静静亮图标让学生看谱打（世界 5）。
 //   boss      是否大考验。
-//   accent    强拍规则（世界 3）：'first'＝每 4 拍的第 1 拍是强拍（鼓），其余都是铃鼓；
-//             'first-third'＝第 1、3 拍是强拍（鼓），其余铃鼓。省略＝没有强拍规则。
-//             规则写在资料里：tests/levels.test.ts 会检查「强拍位置是鼓、其余是铃鼓」，画面上强拍的草莓画大一号。
+//   accent    强拍规则（世界 3）：'first'＝每 4 拍的第 1 拍是强拍（鼓），其余都是三角铁；
+//             'first-third'＝第 1、3 拍是强拍（鼓），其余三角铁。省略＝没有强拍规则。
+//             规则写在资料里：tests/levels.test.ts 会检查「强拍位置是鼓、其余是三角铁」，画面上强拍的草莓画大一号。
 //   backing   伴奏风格编号 1–6（一个世界一种，见 engine/backing.ts 的 BACKING_INFO）。
 // 说明文字（关卡名、世界名）不放这里，都在 data/say.ts。
 // ────────────────────────────────────────────────────────────────
@@ -45,7 +45,7 @@ export const LEVELS_PER_WORLD = 3
 export const BPM_MIN = 60
 export const BPM_MAX = 120
 
-/** 'DTTD' → [鼓, 铃鼓, 铃鼓, 鼓]（D＝drum，T＝tamb）。 */
+/** 'DTTD' → [鼓, 三角铁, 三角铁, 鼓]（D＝drum，T＝tamb）。 */
 const p = (s: string): Cell[] =>
   [...s].map((c) => {
     if (c === 'D') return 'drum'
@@ -69,12 +69,12 @@ export const LEVELS: LevelDef[] = [
   lv({ world: 1, index: 2, bpm: 76, demo: true, boss: false, backing: 1, rounds: [r('DDDD', 76), r('DDDD', 80), r('DDDDDDDD', 76), r('DDDDDDDD', 80)] }),
   lv({ world: 1, index: 3, bpm: 80, demo: true, boss: true, backing: 1, rounds: [r('DDDDDDDD', 80), r('DDDDDDDD', 83), r('DDDDDDDD', 86), r('DDDDDDDD', 90)] }),
 
-  // ── 世界 2 两种声音：鼓和铃鼓的组合（4 拍，80）；2-2 由易到难（换声音的次数 1→2→3），大考验 8 拍 ──
+  // ── 世界 2 两种声音：鼓和三角铁的组合（4 拍，80）；2-2 由易到难（换声音的次数 1→2→3），大考验 8 拍 ──
   lv({ world: 2, index: 1, bpm: 80, demo: true, boss: false, backing: 2, rounds: [r('DDDT'), r('DDTT'), r('TDDD'), r('TTDD')] }),
   lv({ world: 2, index: 2, bpm: 80, demo: true, boss: false, backing: 2, rounds: [r('DTDD'), r('DTTD'), r('TDTT'), r('DTDT')] }),
   lv({ world: 2, index: 3, bpm: 80, demo: true, boss: true, backing: 2, rounds: [r('DDTTDDTT'), r('DTDDDTTD'), r('TTDDTDTD'), r('DDTDTDTT')] }),
 
-  // ── 世界 3 第一拍最重：强拍＝鼓，其余＝铃鼓。3-1 只强调第 1 拍；3-2 加入第 1、3 拍；大考验两种轮流 ──
+  // ── 世界 3 第一拍最重：强拍＝鼓，其余＝三角铁。3-1 只强调第 1 拍；3-2 加入第 1、3 拍；大考验两种轮流 ──
   // 强拍型只有「DTTT／DTDT」，所以靠长度（4→8 拍）与速度（80/85/90）来分轮。
   lv({ world: 3, index: 1, bpm: 80, demo: true, boss: false, backing: 3, accent: 'first', rounds: [r('DTTT', 80), r('DTTT', 85), r('DTTTDTTT', 80), r('DTTTDTTT', 85)] }),
   lv({ world: 3, index: 2, bpm: 80, demo: true, boss: false, backing: 3, accent: 'first-third', rounds: [r('DTDT', 80), r('DTDT', 85), r('DTDTDTDT', 80), r('DTDTDTDT', 85)] }),

@@ -42,7 +42,7 @@ export default function SoundCheck({ go, next }: { go: Go; next: Route }) {
     const res = await runCalibration((i) => {
       if (!alive.current) return
       setBeat(i)
-      if (isAuto()) autoTap('drum') // 机器人：每拍点一下（?late= 会让它整体晚一点，校准就量到那个延迟）
+      if (isAuto()) autoTap('drum', true) // 机器人：每拍点一下（?late= 会让它整体晚一点，校准就量到那个延迟）
     })
     if (!alive.current) return
     setShaky(res.shaky)

@@ -1,5 +1,13 @@
 # 软糖回声乐园 · 交接
 
+## 🔧 2026-10-11 下午：老师转达试用老师回馈（v1.1，待 verify 后上线）
+- 回馈（含 3 段 WhatsApp 语音，mlx_whisper 转写）：指示人声和节奏混在一起会乱；熊的倒数节奏和 tok tok 节拍不一样；不用讲话，出 3 2 1 就好；加一个教学教他们听「tok tok tok tok」；像超市扶梯一直转，准备好了自己踏上去。
+- 改法：① 关卡与学一学跟拍中**完全不念**（拿掉 countVoice／`play.ready`／phase label 语音；开始时 stopSpeaking）；② **扶梯**：`timeline.extendPrep`＋`Scheduler.shiftTempoFrom`，Session.checkStep 在学生第 1 拍判定窗关后看有没有按（任何垫子），没有就预备再转一小节，最多 `MAX_WAIT_BARS=3`；预备与学生回合节拍器同音量，晚决定听不出来；③ 学一学加第 3 步「听四下，再开始」（mode `join`：无开场、无示范），共 6 步，测验失败回第 4 步；④ 学一学示范也不再隐藏草莓。59 测试过。
+- 旧档 countVoice.ts／gen-count.py／count-*.mp3 搬到 `~/Documents/待删除/mz-irama/countvoice/`。
+- 同批：示范提示「听熊打」→「听我打」、学一学「听我敲…」「我先打…」（换小动物也通用）。
+- 同批（my-agent-61 在二年级对话里问老师后代改，12:55，我收进来）：kerincing＝**三角铁**——名称、垫子图 `pad-tamb.webp`、熊图 `bear-tamb.webp`、合成声 `synth.tamb()`（不谐和泛音长余音）一起改，内部 id 仍是 `tamb`；规格 §10-2 已定案。Hub 封面重画（`assets-src/hub/cover-tri-*.png`）。
+- 测试开关新增 `?auto=1&wait=N`（机器人每轮让扶梯空转 N 小节才踏入）；机器人校准改扣喇叭延迟（`autoTap(pad, true)`），不然关卡里会被判「早了」。
+
 ## ✅ 2026-10-11 已上线 v1.0
 - 老师在关口②说「可以发布」。工具：https://tahun1-mz-irama.vercel.app（repo kongsi-idea/tahun1-mz-irama，push main 自动部署，Actions 首跑 success）。
 - Hub：条目已加（署名黄慧欣老师／黄，title_bm「Taman Gema Irama」老师定），封面＋3 张正式网址截图；Hub 部署＋alias；`npm run check -- tahun1-mz-irama` 全部通过。

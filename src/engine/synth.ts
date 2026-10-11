@@ -1,4 +1,4 @@
-// 合成器：master＋compressor＋程序生成回响，以及一年级打击乐（鼓、铃鼓、节拍器）。
+// 合成器：master＋compressor＋程序生成回响，以及一年级打击乐（鼓、三角铁、节拍器）。
 // 合成法移植自 sound-demo.html（老师听过没否决的版本）。
 import { getContext } from './clock.ts'
 import { BACKING_VOLUME, MASTER_VOLUME } from './config.ts'
@@ -139,40 +139,41 @@ export function drum(t: number, v = 1): void {
   n.stop(t + 0.06)
 }
 
+/** 三角铁（10-11 老师：kerincing＝三角铁；内部 id 沿用 'tamb'）：敲击瞬间的细金属噪音＋几个不谐和泛音的长余音。 */
 export function tamb(t: number, v = 1): void {
   const { ctx } = g()
   v *= hum()
-  // 三片小铃错开
-  for (let k = 0; k < 3; k++) {
-    const tt = t + k * 0.009 + Math.random() * 0.004
-    const n = noise()
-    const hp = ctx.createBiquadFilter()
-    const bp = ctx.createBiquadFilter()
-    const og = ctx.createGain()
-    hp.type = 'highpass'
-    hp.frequency.value = 5500
-    bp.type = 'bandpass'
-    bp.frequency.value = 8200 + k * 900
-    bp.Q.value = 3
-    env(og, tt, 0.32 * v * (1 - k * 0.2), 0.002, 0.16 + Math.random() * 0.05)
-    n.connect(hp)
-    hp.connect(bp)
-    bp.connect(og)
-    out(og, 0.6)
-    n.start(tt)
-    n.stop(tt + 0.3)
-  }
-  // 金属泛音
-  for (const fq of [5300, 7100, 9400]) {
+  // 敲棒碰到金属的「嗒」
+  const n = noise()
+  const hp = ctx.createBiquadFilter()
+  const ng = ctx.createGain()
+  hp.type = 'highpass'
+  hp.frequency.value = 7000
+  env(ng, t, 0.12 * v, 0.001, 0.025)
+  n.connect(hp)
+  hp.connect(ng)
+  out(ng, 0.3)
+  n.start(t)
+  n.stop(t + 0.05)
+  // 三角铁的泛音不成整数倍，越高越短
+  const base = 1240 * (1 + (Math.random() - 0.5) * 0.006)
+  const partials: [number, number, number][] = [
+    [1, 0.11, 1.1],
+    [2.76, 0.07, 0.85],
+    [4.07, 0.05, 0.6],
+    [5.4, 0.035, 0.45],
+    [6.9, 0.02, 0.3],
+  ]
+  for (const [ratio, amp, dec] of partials) {
     const o = ctx.createOscillator()
     const og = ctx.createGain()
     o.type = 'sine'
-    o.frequency.value = fq * (1 + (Math.random() - 0.5) * 0.01)
-    env(og, t, 0.025 * v, 0.002, 0.22)
+    o.frequency.value = base * ratio
+    env(og, t, amp * v, 0.002, dec)
     o.connect(og)
-    out(og, 0.6)
+    out(og, 0.5)
     o.start(t)
-    o.stop(t + 0.3)
+    o.stop(t + dec + 0.05)
   }
 }
 

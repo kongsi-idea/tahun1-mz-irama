@@ -32,7 +32,7 @@ export const ASSETS: Record<AssetKey, string | null> = {
   'bear.happy': '/img/bear-jump.webp',
   'bear.spin': '/img/bear-spin.webp',
   'bear.cheer': '/img/bear-cheer.webp',
-  'bear.tamb': '/img/bear-tamb.webp', // 摇铃鼓（示范铃鼓时用）
+  'bear.tamb': '/img/bear-tamb.webp', // 敲三角铁（示范三角铁时用）
   'icon.strawberry': '/img/icon-strawberry.webp',
   'icon.lemon': '/img/icon-lemon.webp',
   'pad.drum': '/img/pad-drum.webp',

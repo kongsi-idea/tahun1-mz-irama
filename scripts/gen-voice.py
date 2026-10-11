@@ -67,6 +67,6 @@ with open(MANIFEST, 'w', encoding='utf-8') as f:
         f.write(f"  '{x}',\n")
     f.write(']\n')
 
-extra = sorted(set(n[:-4] for n in os.listdir(AUDIO) if n.endswith('.mp3') and not n.startswith('count-')) - set(files))
+extra = sorted(set(n[:-4] for n in os.listdir(AUDIO) if n.endswith('.mp3')) - set(files))
 if extra:
     print(f'注意：public/audio/ 里有 {len(extra)} 个旧音档已不再使用（句子改过）：{extra[:5]}。可移到 ~/Documents/待删除/')

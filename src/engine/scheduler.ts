@@ -189,6 +189,11 @@ export class Scheduler {
     }
   }
 
+  /** 拍号 ≥ at 的变速点全部往后挪 delta 拍（「扶梯」多转一小节时用；只可挪还没排到的未来）。 */
+  shiftTempoFrom(at: number, delta: number): void {
+    for (const s of this.map) if (s.beat >= at && s.beat > 0) s.beat += delta
+  }
+
   /** 在下一条尚未排出的小节线改速度（只影响未来的 tick，已排的不动）。回传生效的拍号。 */
   changeTempoAtNextBar(bpm: number): number {
     const nextBeat = this.nextTick / TICKS_PER_BEAT

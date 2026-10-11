@@ -1,15 +1,17 @@
 // 一场游戏的时间轴（纯函数，不碰 Audio）。单位：拍（beat），从排程器起点算。
 // 一轮的版型：
-//   echo   ：示范 n 拍 → 预备 4 拍（一整小节，「换你了！」＋大字 1、2、3、4）→ 学生 n 拍 → 休息 4 拍
+//   echo   ：示范 n 拍 → 预备 4 拍（一整小节，「换你了！」＋大字「预备、3、2、1」，不念）→ 学生 n 拍 → 休息 4 拍
 //            （长度 2n+8，n=4／8 时是 4 的倍数；休息不能是 2 拍，不然下一轮的起点会落在小节中间）
 //   look   ：同 echo，但「示范」改成无声看谱（世界 5：不放示范）
-//   follow ：学生 n 拍（图标随拍亮起、同时打）→ 休息 4 拍                     （学一学第 3、4 步）
+//   follow ：学生 n 拍（图标随拍亮起、同时打）→ 休息 4 拍                     （学一学「一颗草莓拍一下」「第一拍最重」）
+//   join   ：预备 4 拍 → 学生 n 拍 → 休息 4 拍（没有示范、没有开场；学一学「听四下，再开始」）
+// 「扶梯」：预备小节会一直重复，直到学生在某个小节的第 1 拍按下去才开始（Session 呼叫 extendPrep 往后延一小节）。
 // 所有轮的长度都是整小节，所以每轮的起点都在小节线上，变速（每轮 bpm 不同）可以直接写进 tempo map。
 import { BEATS_PER_BAR } from '../engine/config.ts'
 import type { TempoMap } from '../engine/scheduler.ts'
 import type { Cell } from '../data/levels.ts'
 
-export type Mode = 'echo' | 'look' | 'follow'
+export type Mode = 'echo' | 'look' | 'follow' | 'join'
 export type PhaseName = 'lead' | 'demo' | 'look' | 'prep' | 'play' | 'rest'
 
 export interface RoundSpec {
@@ -57,6 +59,7 @@ export function buildTimeline(specs: RoundSpec[], leadBeats = LEAD_BEATS): Timel
   const rounds: RoundLayout[] = []
   const tempoMap: TempoMap = [{ beat: 0, bpm: specs[0]?.bpm ?? 80 }]
   let cur = 0
+  if (specs[0]?.mode === 'join') leadBeats = 0 // 预备小节本身就是开场
   if (leadBeats > 0) {
     segments.push({ phase: 'lead', round: -1, start: 0, beats: leadBeats })
     cur = leadBeats
@@ -74,8 +77,10 @@ export function buildTimeline(specs: RoundSpec[], leadBeats = LEAD_BEATS): Timel
       segments.push({ phase: 'rest', round: index, start: cur, beats: REST_BEATS_FOLLOW })
       cur += REST_BEATS_FOLLOW
     } else {
-      segments.push({ phase: spec.mode === 'look' ? 'look' : 'demo', round: index, start: cur, beats: n })
-      cur += n
+      if (spec.mode !== 'join') {
+        segments.push({ phase: spec.mode === 'look' ? 'look' : 'demo', round: index, start: cur, beats: n })
+        cur += n
+      }
       segments.push({ phase: 'prep', round: index, start: cur, beats: PREP_BEATS })
       cur += PREP_BEATS
       playStart = cur
@@ -87,6 +92,32 @@ export function buildTimeline(specs: RoundSpec[], leadBeats = LEAD_BEATS): Timel
     rounds.push({ index, spec, start, playStart, playBeats: n, end: cur })
   })
   return { segments, rounds, tempoMap, totalBeats: cur }
+}
+
+/**
+ * 「扶梯」：第 round 轮的学生还没踏进来，预备再转一小节——预备段加长 4 拍，之后的所有段、轮、变速点都往后挪 4 拍。
+ * 就地修改 tl（Session 同时要叫 Scheduler.shiftTempoFrom 挪它自己那份 tempo map）。回传挪动的起点拍号。
+ */
+export function extendPrep(tl: Timeline, round: number): number {
+  const d = BEATS_PER_BAR
+  const lay = tl.rounds[round]
+  const at = lay.playStart
+  for (const s of tl.segments) {
+    if (s.start >= at) s.start += d
+    else if (s.round === round && s.phase === 'prep') s.beats += d
+  }
+  lay.playStart += d
+  lay.end += d
+  for (const r of tl.rounds) {
+    if (r.index > round) {
+      r.start += d
+      r.playStart += d
+      r.end += d
+    }
+  }
+  for (const t of tl.tempoMap) if (t.beat >= at) t.beat += d
+  tl.totalBeats += d
+  return at
 }
 
 /** 第 beat 拍（可小数）落在哪一段；超过总长回传 null。 */

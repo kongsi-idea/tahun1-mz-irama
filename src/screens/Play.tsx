@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { getContext, unlock } from '../engine/clock.ts'
-import { loadCountVoice } from '../engine/countVoice.ts'
 import { getLevel, accentMask, roundAccent, roundBpm } from '../data/levels.ts'
 import { clearedWorlds, saveBest } from '../data/progress.ts'
-import { speak, t } from '../data/say.ts'
+import { stopSpeaking, t } from '../data/say.ts'
 import { useSession } from '../game/useSession.ts'
 import { useCheer } from '../game/useCheer.ts'
 import { isAuto } from '../game/auto.ts'
@@ -17,7 +16,7 @@ import IconTrack from '../ui/IconTrack.tsx'
 import TopBar from '../ui/TopBar.tsx'
 import type { Go } from './nav.ts'
 
-// 核心玩法：回声（规格 §3.3）。示范（草莓一直显示）→ 「换你了！」一整小节预备（大字＋人声「预备、3、2、1」）→ 学生打（每拍亮圈＋预告圈）→ 每个图标当场显示判定。一关 4 轮。
+// 核心玩法：回声（规格 §3.3）。示范（草莓一直显示）→ 「换你了！」预备小节（只有节拍器＋大字「预备、3、2、1」，不念）像扶梯一样一直转，学生在小节第 1 拍按下去才开始 → 学生打（每拍亮圈＋预告圈）→ 每个图标当场显示判定。一关 4 轮。
 export default function Play({ levelId, go }: { levelId: string; go: Go }) {
   const level = getLevel(levelId)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -29,7 +28,7 @@ export default function Play({ levelId, go }: { levelId: string; go: Go }) {
   const begin = () => {
     if (!level || started.current) return
     started.current = true
-    void loadCountVoice() // 开场有 4 拍，够载完
+    stopSpeaking()
     setNeedTap(false)
     const mode = level.demo ? 'echo' : 'look'
     const specs: RoundSpec[] = level.rounds.map((r, i) => ({
@@ -84,10 +83,7 @@ export default function Play({ levelId, go }: { levelId: string; go: Go }) {
   }, [])
 
   const label = view ? phaseLabel(view, level?.demo === false ? 'look' : 'echo') : null
-  useEffect(() => {
-    // 「换你了」不念：预备那一小节由 countVoice 在拍点上念「预备、三、二、一」，两个声音会叠在一起
-    if (label && label !== 'play.yourTurn') speak(label)
-  }, [label])
+  // 关卡里一句话都不念：人声和节拍混在一起，学生会乱（10-11 老师回馈）。提示只用画面上的字和大字 3、2、1。
 
   if (!level) return null
   const first = level.rounds[0].pattern
@@ -159,10 +155,7 @@ export default function Play({ levelId, go }: { levelId: string; go: Go }) {
             type="button"
             className="btn btn-coral btn-lg"
             onClick={() => {
-              void unlock().then(() => {
-                speak('play.ready')
-                begin()
-              })
+              void unlock().then(begin)
             }}
           >
             {t('play.start')}

@@ -1,0 +1,18 @@
+@font-face {
+  font-family: 'MzTitle';
+  src: url('/fonts/title.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MzBody';
+  src: url('/fonts/body.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MzNum';
+  src: url('/fonts/num.woff2') format('woff2');
+  font-weight: 500 700;
+  font-display: swap;
+}

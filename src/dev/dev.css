@@ -1,0 +1,48 @@
+/* 试听页／debug 页样式：沿用 tokens.css，不另起炉灶。 */
+.dev { max-width: 760px; margin: 0 auto; padding: var(--space-4) var(--space-3) var(--space-5); }
+.dev h1 { font-family: var(--font-title); font-weight: 400; font-size: clamp(30px, 7vw, 44px); margin: 0 0 var(--space-2); letter-spacing: 0.04em; text-align: center; }
+.dev .lead { text-align: center; color: var(--ink-soft); margin: 0 0 var(--space-4); }
+.dev section { background: rgb(255 253 248 / 0.85); border-radius: var(--radius-md); padding: var(--space-3) var(--space-3) var(--space-4); margin-bottom: var(--space-3); box-shadow: var(--shadow-2); }
+.dev h2 { font-family: var(--font-title); font-weight: 400; font-size: 22px; margin: 0 0 var(--space-1); }
+.dev .note { color: var(--ink-soft); font-size: 14px; margin: 0 0 var(--space-3); line-height: 1.6; }
+.dev .row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; justify-content: center; }
+.dev .pads { gap: var(--space-4); }
+
+.dev-pad {
+  --pad-edge: rgb(91 74 66 / 0.22);
+  border: 0; border-radius: var(--radius-pad); color: #fff;
+  background: var(--jelly-highlight), var(--pad-color);
+  box-shadow: var(--jelly-inner-shadow), var(--shadow-pad);
+  font-family: var(--font-title); font-size: 28px; text-shadow: 0 1px 2px rgb(91 74 66 / 0.35);
+  transition: transform 180ms var(--ease-spring);
+  touch-action: none; cursor: pointer;
+}
+.dev-pad:active, .dev-pad.flash { transform: scale(1.05, 0.9); transition-duration: 60ms; }
+.dev-pad.pad-drum { --pad-color: var(--pad-drum); }
+.dev-pad.pad-tamb { --pad-color: var(--pad-tamb); color: var(--ink); text-shadow: none; }
+
+.dev-btn {
+  border: 0; cursor: pointer; border-radius: var(--radius-pill); padding: 14px 24px; min-height: 52px; min-width: 120px;
+  background: var(--stage-mint); color: var(--ink); font-weight: 700; font-size: 16px;
+  box-shadow: 0 4px 0 rgb(91 74 66 / 0.16), var(--shadow-1);
+  transition: transform 120ms var(--ease-spring);
+}
+.dev-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgb(91 74 66 / 0.16); }
+.dev-btn.on { background: var(--ink); color: var(--cream); }
+
+.seg { display: inline-flex; background: var(--cream-deep); border-radius: var(--radius-pill); padding: 4px; gap: 2px; }
+.seg button { border: 0; background: transparent; border-radius: var(--radius-pill); padding: 10px 16px; min-height: 44px; cursor: pointer; font-family: var(--font-num); font-weight: 600; font-size: 16px; color: var(--ink-soft); }
+.seg button.sel { background: #fff; color: var(--ink); box-shadow: var(--shadow-1); }
+
+.dots { display: flex; gap: 10px; justify-content: center; margin: var(--space-3) 0 var(--space-2); }
+.dots i { width: 22px; height: 22px; border-radius: 50%; background: var(--cream-deep); transition: transform 120ms var(--ease-spring), background 120ms; }
+.dots i.on { background: var(--strawberry); transform: scale(1.3); }
+.dots i.on.first { background: var(--judge-perfect); }
+.stage-text { font-family: var(--font-title); font-size: 30px; text-align: center; min-height: 46px; margin: var(--space-2) 0; }
+.stage-text.me { color: var(--strawberry); }
+.hint { text-align: center; color: var(--ink-soft); font-size: 14px; margin-top: var(--space-4); }
+
+.dev table { width: 100%; border-collapse: collapse; font-family: var(--font-num); font-size: 16px; }
+.dev th { text-align: left; font-weight: 500; color: var(--ink-soft); padding: 6px 8px 6px 0; width: 46%; font-family: var(--font-body); }
+.dev td { padding: 6px 0; font-weight: 600; word-break: break-all; }
+.dev tr + tr { border-top: 1px solid var(--cream-deep); }

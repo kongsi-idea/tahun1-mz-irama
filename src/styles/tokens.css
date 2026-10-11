@@ -1,0 +1,60 @@
+/* 软糖水果乐园 · 设计 token（规格 §5.1）。柔和低饱和，只有乐器垫能「喊」。 */
+:root {
+  /* 背景与地面 */
+  --sky: #dceff5;
+  --cream: #fff6e8;
+  --hill-far: #d6ebdd;
+  --hill-near: #c9e4d2;
+  --cream-deep: #f6e7cf;
+  --stage-mint: #cfe9de;
+
+  /* 乐器垫（全场最饱和） */
+  --pad-drum: #f28b82; /* jelly-coral */
+  --pad-tamb: #f4cf72; /* jelly-butter */
+
+  /* 图标 */
+  --strawberry: #e5534b;
+  --strawberry-leaf: #6dbe6a;
+  --lemon: #f2c94c;
+
+  /* 文字 */
+  --ink: #5b4a42;
+  --ink-soft: #8c7a70;
+
+  /* 判定 */
+  --judge-perfect: #f2a93b;
+  --judge-good: #6dbe8a;
+  --judge-miss: #b9afa8;
+
+  /* 软糖质感 */
+  --jelly-opacity: 0.9;
+  --jelly-highlight: radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0) 55%);
+  --jelly-inner-shadow: inset 0 -10px 18px rgb(91 74 66 / 0.14);
+  --jelly-thick: 6px; /* 下沿同色深一档厚度 */
+
+  /* 字体 */
+  --font-title: 'MzTitle', 'ZCOOL KuaiLe', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-body: 'MzBody', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-num: 'MzNum', 'Fredoka', system-ui, sans-serif;
+
+  /* 圆角 */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --radius-pad: 36px;
+  --radius-pill: 999px;
+
+  /* 阴影（统一左上光源：投影偏右下，多层） */
+  --shadow-1: 0 1px 2px rgb(91 74 66 / 0.1), 0 3px 8px rgb(91 74 66 / 0.08);
+  --shadow-2: 0 2px 4px rgb(91 74 66 / 0.1), 0 8px 16px rgb(91 74 66 / 0.1), 0 18px 32px rgb(91 74 66 / 0.08);
+  --shadow-pad: 0 var(--jelly-thick) 0 var(--pad-edge, rgb(91 74 66 / 0.25)), 0 14px 22px rgb(91 74 66 / 0.18);
+
+  /* 间距与动效 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 40px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}

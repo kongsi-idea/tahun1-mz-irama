@@ -1,6 +1,6 @@
 # 软糖回声乐园 · 交接
 
-## 🔧 2026-10-11 下午：老师转达试用老师回馈（v1.1，待 verify 后上线）
+## ✅ 2026-10-11 下午 v1.1 已上线（试用老师回馈）：verify 本机 3 轮通过、push 自动部署、Hub 1.1＋新封面／缩图、check 全过
 - 回馈（含 3 段 WhatsApp 语音，mlx_whisper 转写）：指示人声和节奏混在一起会乱；熊的倒数节奏和 tok tok 节拍不一样；不用讲话，出 3 2 1 就好；加一个教学教他们听「tok tok tok tok」；像超市扶梯一直转，准备好了自己踏上去。
 - 改法：① 关卡与学一学跟拍中**完全不念**（拿掉 countVoice／`play.ready`／phase label 语音；开始时 stopSpeaking）；② **扶梯**：`timeline.extendPrep`＋`Scheduler.shiftTempoFrom`，Session.checkStep 在学生第 1 拍判定窗关后看有没有按（任何垫子），没有就预备再转一小节，最多 `MAX_WAIT_BARS=3`；预备与学生回合节拍器同音量，晚决定听不出来；③ 学一学加第 3 步「听四下，再开始」（mode `join`：无开场、无示范），共 6 步，测验失败回第 4 步；④ 学一学示范也不再隐藏草莓。59 测试过。
 - 旧档 countVoice.ts／gen-count.py／count-*.mp3 搬到 `~/Documents/待删除/mz-irama/countvoice/`。

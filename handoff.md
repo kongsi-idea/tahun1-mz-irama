@@ -18,4 +18,4 @@
 - tsc 借用：`node ../../3g-assessment/node_modules/typescript/bin/tsc -p /private/tmp/claude-501/tsconfig.mz.json`（该 tsconfig 在 /tmp，重开机会消失；需要时照 strict＋noEmit＋allowImportingTsExtensions＋bundler＋react-jsx 重建）。
 
 ## 🕐 最后更新
-2026-10-11 · Claude Opus @ yquanloo 的 Mac · Git：待推
+2026-10-11 · Claude Opus @ yquanloo 的 Mac · Git：✅ 已推

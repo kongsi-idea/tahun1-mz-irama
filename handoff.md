@@ -1,5 +1,10 @@
 # 软糖回声乐园 · 交接
 
+## ✅ 2026-10-11 已上线 v1.0
+- 老师在关口②说「可以发布」。工具：https://tahun1-mz-irama.vercel.app（repo kongsi-idea/tahun1-mz-irama，push main 自动部署，Actions 首跑 success）。
+- Hub：条目已加（署名黄慧欣老师／黄，title_bm「Taman Gema Irama」老师定），封面＋3 张正式网址截图；Hub 部署＋alias；`npm run check -- tahun1-mz-irama` 全部通过。
+- 仍待：ta／ti-ti 念法与「铃鼓」名（黄老师）；世界 5 是否改名「看图打」；实机 5 分钟漂移；地图熊剪影盖住「大考验」；新版校准待课堂实测。
+
 ## 目前做到哪
 **⏸ 关口②：等老师第二次试玩（2026-10-11 05:xx）**。老师 01:50 回馈 7 条已修（见下段）；C6 verify（18 关版）：学一学走得完且不能跳过、世界 1 三关 ★★★、late=180 校准后仍 ★★★（offset 180）、漏按结算温和、CPU 4× 平均帧 16.7ms、控制台 0 错误、无 404、track-use 在、首页载入 616KB、图片最大 41KB。之后主代理补修：预备大字 1–4 原本没渲染（Play.tsx 漏接 `count`）、空泡泡加 `is-empty`、直立 8 颗水果 54→66px、第 1 拍大字用 em 变太小。
 - **10-11 老师：「我按的拍子和系统 detect 到的不一样」已改（待老师实测）**：① 画面时钟改成 `calibrate.visualTime()`＝currentTime − 校准偏移（0~350ms），圈亮／预告圈缩到底＝系统等你按的时刻，看圈按和听声音按判定一致（旧版画面用 outputLatency，浏览器报的延迟不准时，看圈按会整体偏）；② perf↔audio 对照改成每 200ms 取样、取 2 秒内最大差值（currentTime 是一块一块跳的，单次取样会落后几到二十毫秒）；③ 校准 8 拍→12 拍取后 8 下，算离散度，不稳就提示「再点一次会更准」，成功画面也能再试；④ 判「很好」时小字显示「早了一点／晚了一点」。57 测试过；未派 verify（Playwright MCP 连不上）。

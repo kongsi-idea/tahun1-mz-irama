@@ -69,9 +69,6 @@ export default function Home({ go }: { go: Go }) {
         >
           {t('home.settings')}
         </button>
-        <p className="credit">
-          {t('app.credit')}
-        </p>
       </div>
     </main>
   )

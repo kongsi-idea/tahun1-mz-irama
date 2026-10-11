@@ -11,7 +11,6 @@ export const SAY = {
   // 通用
   'app.title': '软糖回声乐园',
   'app.tagline': '跟着果冻熊，打出好听的回声',
-  'app.credit': '黄慧欣老师',
   'common.back': '返回',
   'inst.drum': '鼓',
   'inst.tamb': '三角铁',

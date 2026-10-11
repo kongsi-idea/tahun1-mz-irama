@@ -122,7 +122,6 @@ html[data-powersave='on'] .stage * { animation-duration: 0.01ms !important; anim
 .home-bear { --bear-size: clamp(96px, 20dvh, 150px); margin-top: calc(var(--bear-size) * -0.45); }
 .home h1 { margin: 0; font-family: var(--font-title); font-weight: 400; font-size: clamp(36px, 9vw, 56px); letter-spacing: 0.05em; line-height: 1.1; }
 .tagline { margin: 0; color: var(--ink-soft); font-size: 18px; }
-.credit { margin: var(--space-2) 0 0; color: var(--ink-soft); font-size: 16px; }
 
 /* ---------- 游戏版面（35/20/45；直立 30/18/52） ---------- */
 .screen-stage { background: transparent; }

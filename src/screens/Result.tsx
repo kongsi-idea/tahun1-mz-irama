@@ -98,7 +98,6 @@ export default function Result({ result, go }: { result: PlayResult; go: Go }) {
           </div>
           {!hasNext && nextId !== null && <p className="soon">{t('result.soon')}</p>}
         </div>
-        <p className="credit">{t('app.credit')}</p>
       </div>
     </main>
   )
